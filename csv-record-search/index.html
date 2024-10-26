@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV/Excel Paste & Search with JSON</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Smooth transition for expand/collapse */
+        .transition-height {
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+ 
+    <!-- Main Container -->
+    <div class="w-full max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+        <h1 class="text-2xl font-bold">
+            Record Search Utility - (Registration Counter)
+        </h1>
+        <!-- Toggle Button for Expand/Collapse -->
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl  text-gray-800">Paste Excel/CSV Data</h2>
+            <button id="togglePasteSection" class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600">Click to Expand</button>
+        </div>
+
+        <!-- Paste Section (Expandable) -->
+        <div id="pasteSection" class="overflow-hidden transition-height max-h-0 opacity-0">
+            <form id="dataForm" class="space-y-4">
+                <textarea id="dataInput" class="w-full h-40 p-4 text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Paste your CSV or Excel data here..."></textarea>
+                <button type="submit" class="w-full bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600">Submit</button>
+            </form>
+        </div>
+
+        <!-- Search Section -->
+        <div class="mt-8">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Search Records</h2>
+            <input type="text" id="searchInput" class="w-full p-4 text-3xl border font-semibold text-red-600 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search records...">
+        </div>
+
+        <!-- Search Results -->
+        <div id="results" class="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <!-- Cards will be appended here -->
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'csvJsonData';
+        window.addEventListener('load', function () {
+    const storedData = localStorage.getItem(STORAGE_KEY);
+    if (storedData) {
+        jsonData = JSON.parse(storedData);
+        //alert('Data loaded from local storage!');
+    }
+});
+
+        const dataForm = document.getElementById('dataForm');
+        const dataInput = document.getElementById('dataInput');
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('results');
+        const pasteSection = document.getElementById('pasteSection');
+        const togglePasteButton = document.getElementById('togglePasteSection');
+
+        let isExpanded = false; // Track if the section is expanded or collapsedload
+        let jsonData = [];
+
+        // Function to parse CSV/Tabular data into a JSON array
+        function parseData(data) {
+            const lines = data.trim().split('\n');
+            const headers = lines[0].split(/\t|,/); // Supports tab and comma separators
+            return lines.slice(1).map(line => {
+                const values = line.split(/\t|,/);
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header.trim()] = values[index] ? values[index].trim() : '';
+                });
+                return obj;
+            });
+        }
+
+        // Handle form submission
+        dataForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const rawData = dataInput.value.trim();
+            
+            pasteSection.style.maxHeight = '0';
+                pasteSection.style.opacity = '0';
+                togglePasteButton.textContent = 'Expand';
+            // Parse the pasted data into a JSON array
+            jsonData = parseData(rawData);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(jsonData));
+            //alert('Data submitted successfully and converted to JSON!');
+            dataInput.value = ''; // Clear the textarea
+        });
+
+        // Handle search input
+        searchInput.addEventListener('input', function (e) {
+            const query = e.target.value.toLowerCase();
+            const words = query.split(' ').filter(word => word); // Split query by spaces and filter empty strings
+
+            // Filter records that match ALL words in the query
+            const filteredRecords = jsonData.filter(record => {
+                return words.every(word => {
+                    return Object.values(record).some(value => value.toLowerCase().includes(word));
+                });
+            });
+
+            displayResults(filteredRecords);
+        });
+
+        // Function to display search results as a structured list with labels
+        function displayResults(records) {
+            resultsContainer.innerHTML = '';
+            if (records.length === 0) {
+                resultsContainer.innerHTML = '<p class="text-gray-500 text-lg">No matches found.</p>';
+                return;
+            }
+
+            records.forEach(record => {
+                const card = document.createElement('div');
+                card.classList.add('p-4', 'bg-gray-100', 'rounded-lg', 'shadow-md', 'text-gray-800', 'space-y-2');
+
+                // Create individual rows with labels
+                for (const key in record) {
+                    if (record.hasOwnProperty(key)) {
+                        const row = document.createElement('div');
+                        row.classList.add('text-sm');
+                        row.innerHTML = `<strong>${key}:</strong> ${record[key]}`;
+                        card.appendChild(row);
+                    }
+                }
+
+                resultsContainer.appendChild(card);
+            });
+        }
+
+        // Toggle the expand/collapse of the paste section
+        togglePasteButton.addEventListener('click', function () {
+            if (isExpanded) {
+                pasteSection.style.maxHeight = '0';
+                pasteSection.style.opacity = '0';
+                togglePasteButton.textContent = 'Expand';
+            } else {
+                pasteSection.style.maxHeight = '500px'; // Enough height to show the textarea
+                pasteSection.style.opacity = '1';
+                togglePasteButton.textContent = 'Collapse';
+            }
+            isExpanded = !isExpanded;
+        });
+    </script>
+</body>
+</html>
