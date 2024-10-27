@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BK Music Library</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {{ font-family: Arial, sans-serif; }}
+    </style>
+    <script>
+        // Fetch the JSON file and populate the song list
+        document.addEventListener('DOMContentLoaded', function() {{
+            fetch('music_data.json')
+                .then(response => response.json())
+                .then(data => {{
+                    let songListDiv = document.getElementById('songList');
+                    data.forEach(song => {{
+                        let songDiv = document.createElement('div');
+                        songDiv.classList.add('song', 'bg-white', 'p-4', 'rounded-lg', 'shadow-md');
+                        
+                        // Create song details
+                        let songTitle = `<p class="font-semibold song-title">${song.file_name}</p>`;
+                        let songAlbum = `<p class="song-album">Album: ${song.album}</p>`;
+                        let songArtist = `<p class="song-artist">Artist: ${song.artist}</p>`;
+                        let songDuration = `<p>Duration: ${song.duration}</p>`;
+                        let songFileSize = `<p>File Size: ${song.file_size}</p>`;
+                        let playButton = `<button class="play-button text-indigo-500 mt-2 underline" onclick="playSong('${song.relative_path}')">Play</button>`;
+                        
+                        // Append to songDiv
+                        songDiv.innerHTML = songTitle + songAlbum + songArtist + songDuration + songFileSize + playButton;
+                        songListDiv.appendChild(songDiv);
+                    }});
+                }});
+        }});
+
+        // Play song using the single audio player
+        function playSong(filePath) {{
+            var audioPlayer = document.getElementById('audioPlayer');
+            var source = document.getElementById('audioSource');
+            source.src = 'https://tune.nkdews.me/extusb/BK-Songs/' + filePath;
+            audioPlayer.load();
+            audioPlayer.play();
+        }}
+
+        // Search function to filter songs by title, album, or artist
+        function searchSongs() {{
+            var input = document.getElementById('searchBar').value.toLowerCase();
+            var songs = document.getElementsByClassName('song');
+            for (var i = 0; i < songs.length; i++) {{
+                var songTitle = songs[i].getElementsByClassName('song-title')[0].textContent.toLowerCase();
+                var songAlbum = songs[i].getElementsByClassName('song-album')[0].textContent.toLowerCase();
+                var songArtist = songs[i].getElementsByClassName('song-artist')[0].textContent.toLowerCase();
+                
+                // If search input matches the song title, album, or artist, show the song
+                if (songTitle.includes(input) || songAlbum.includes(input) || songArtist.includes(input)) {{
+                    songs[i].style.display = '';
+                }} else {{
+                    songs[i].style.display = 'none';
+                }}
+            }}
+        }}
+    </script>
+</head>
+<body class="bg-gray-100 p-5">
+    <div class="container mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-6">Music Library</h1>
+        <!-- Search Bar -->
+        <input type="text" id="searchBar" onkeyup="searchSongs()" placeholder="Search for songs, albums, or artists..." class="w-full p-3 mb-6 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        
+        <!-- Song List -->
+        <div id="songList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-20 pb-10"></div>
+
+        <!-- Single Audio Player -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-gray-300">
+            <audio id="audioPlayer" controls class="w-full">
+                <source id="audioSource" src="" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+    </div>
+</body>
+</html>
