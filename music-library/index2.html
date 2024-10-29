@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Library with Playlist Manager</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .hidden { display: none; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+    <script>
+        let currentSongIndex = -1;
+        let filteredSongs = [];
+        let playlist = [];
+
+        // Fetch the JSON file and populate the song list
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('music_data.json')
+                .then(response => response.json())
+                .then(data => {
+                    let songListDiv = document.getElementById('songList');
+                    data.forEach((song, index) => {
+                        let songDiv = document.createElement('div');
+                        songDiv.classList.add('song', 'bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'flex', 'justify-between');
+                        
+                        // Song details
+                        let songDetails = `
+                            <div>
+                                <p class="font-semibold song-title">${song.file_name}</p>
+                                <p class="song-album">Album: ${song.album || 'Unknown'}</p>
+                                <p class="song-artist">Artist: ${song.artist || 'Unknown'}</p>
+                                <p>Duration: ${song.duration || 'Unknown'}</p>
+                                <p>File Size: ${song.file_size}</p>
+                            </div>`;
+                        let playButton = `<button class="play-button text-indigo-500 underline" onclick="playSong('${song.relative_path}', ${index})">Play</button>`;
+                        let addButton = `<button class="text-green-500 underline" onclick="addToPlaylist('${song.file_name}', '${song.relative_path}')">Add to Playlist</button>`;
+                        
+                        // Append to songDiv
+                        songDiv.innerHTML = songDetails + playButton + addButton;
+                        songListDiv.appendChild(songDiv);
+                    });
+
+                    filteredSongs = Array.from(document.getElementsByClassName('song'));
+                });
+
+            // Event listener to auto-play next song
+            document.getElementById('audioPlayer').addEventListener('ended', playNextSong);
+        });
+
+        // Play song using single audio player
+        function playSong(filePath, index = -1) {
+            var audioPlayer = document.getElementById('audioPlayer');
+            var source = document.getElementById('audioSource');
+            source.src = filePath;
+            audioPlayer.load();
+            audioPlayer.play();
+            currentSongIndex = index;
+
+            // Display ID3 tags
+    
+        }
+
+        // Display metadata
+        function displayMetadata(tags) {
+            document.getElementById('songMetadata').classList.remove('hidden');
+            document.getElementById('songTitle').textContent = "Title: " + (tags.title || "Unknown Title");
+            document.getElementById('songArtist').textContent = "Artist: " + (tags.artist || "Unknown Artist");
+            document.getElementById('songAlbum').textContent = "Album: " + (tags.album || "Unknown Album");
+        }
+
+        // Add to playlist
+        function addToPlaylist(songName, filePath) {
+            playlist.push({ name: songName, path: filePath });
+            updatePlaylist();
+        }
+
+        // Update playlist display
+        function updatePlaylist() {
+            let playlistDiv = document.getElementById('playlist');
+            playlistDiv.innerHTML = "";
+            playlist.forEach(song => {
+                let songItem = document.createElement('div');
+                songItem.classList.add('playlist-item', 'p-2', 'border-b');
+                songItem.textContent = song.name;
+                playlistDiv.appendChild(songItem);
+            });
+        }
+
+        // Search function
+        function searchSongs() {
+            var input = document.getElementById('searchBar').value.toLowerCase();
+            var songs = document.getElementsByClassName('song');
+            filteredSongs = [];
+            for (var i = 0; i < songs.length; i++) {
+                var songTitle = songs[i].getElementsByClassName('song-title')[0].textContent.toLowerCase();
+                var songAlbum = songs[i].getElementsByClassName('song-album')[0].textContent.toLowerCase();
+                var songArtist = songs[i].getElementsByClassName('song-artist')[0].textContent.toLowerCase();
+
+                if (songTitle.includes(input) || songAlbum.includes(input) || songArtist.includes(input)) {
+                    songs[i].style.display = '';
+                    filteredSongs.push(songs[i]);
+                } else {
+                    songs[i].style.display = 'none';
+                }
+            }
+            currentSongIndex = -1;
+        }
+    </script>
+</head>
+<body class="bg-gray-100 p-5">
+    <div class="container mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-6">Music Library</h1>
+        <button class="bg-blue-500 text-white px-4 py-2 rounded-lg mb-4" onclick="togglePlaylistManager()">Playlist Manager</button>
+
+        <div class="flex">
+            <!-- Left side: Search results -->
+            <div class="w-2/3">
+                <input type="text" id="searchBar" onkeyup="searchSongs()" placeholder="Search for songs, albums, or artists..." class="w-full p-3 mb-6 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                
+                <div id="songList" class="grid grid-cols-1 gap-6"></div>
+            </div>
+
+            <!-- Right side: Playlist Manager -->
+            <div id="playlistManager" class="w-1/3  ml-4">
+                <h2 class="text-2xl font-bold mb-4">Your Playlist</h2>
+                <div id="playlist" class="p-4 bg-white rounded-lg shadow-md h-full overflow-y-auto border">
+                    <!-- Dynamic Playlist Items will appear here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Audio Player -->
+        <div class="fixed bottom-0 left-0 right-0 bg-white p-4 border-t border-gray-300">
+            <audio id="audioPlayer" controls class="w-full">
+                <source id="audioSource" src="" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+    </div>
+</body>
+</html>

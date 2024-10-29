@@ -8,19 +8,19 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {{ font-family: Arial, sans-serif; }}
+        body{ font-family: Arial, sans-serif; }
     </style>
     <script>
         let currentSongIndex = -1;
         let filteredSongs = [];
 
         // Fetch the JSON file and populate the song list
-        document.addEventListener('DOMContentLoaded', function() {{
+        document.addEventListener('DOMContentLoaded', function(){
             fetch('luhar_data.json')
                 .then(response => response.json())
-                .then(data => {{
+                .then(data =>{
                     let songListDiv = document.getElementById('songList');
-                    data.forEach(song => {{
+                    data.forEach(song =>{
                         let songDiv = document.createElement('div');
                         songDiv.classList.add('song', 'bg-white', 'p-4', 'rounded-lg', 'shadow-md');
                         const paths=song.relative_path.split('/');
@@ -35,16 +35,16 @@
                         // Append to songDiv
                         songDiv.innerHTML = songTitle + songAlbum + songArtist + playButton;// + songArtist + songDuration + songFileSize + playButton;
                         songListDiv.appendChild(songDiv);
-                    }});
+                    });
                     filteredSongs = Array.from(document.getElementsByClassName('song'));
 
-                }});
+                });
                 document.getElementById('audioPlayer').addEventListener('ended', playNextSong);
 
-        }});
+        });
 
         // Play song using the single audio player
-        function playSong(filePath,index = -1) {{
+        function playSong(filePath,index = -1){
          
             var audioPlayer = document.getElementById('audioPlayer');
             var source = document.getElementById('audioSource');
@@ -53,41 +53,80 @@
             audioPlayer.play();
             currentSongIndex = index;
             document.getElementById('musicTitle').innerHTML=decodeURIComponent(filePath.split('/').reverse()[0]);
-        }}
+            updateMediaSession({ title: `Track ${index + 1}`, artist: "Unknown Artist", album: "Unknown Album" }, filePath);
 
-        function playNextSong() {{
+        }
+
+                // Play next song in the list
+        function playNextSong() {
+            if (currentSongIndex + 1 < filteredSongs.length) {
+                playSong(filteredSongs[currentSongIndex + 1].querySelector('.play-button').getAttribute('onclick').split("'")[1], currentSongIndex + 1);
+            }
+        }
+
+        // Play previous song in the list
+        function playPreviousSong() {
+            if (currentSongIndex > 0) {
+                playSong(filteredSongs[currentSongIndex - 1].querySelector('.play-button').getAttribute('onclick').split("'")[1], currentSongIndex - 1);
+            }
+        }
+
+        function playNextSong1(){
             
-            if (currentSongIndex >= 0 && currentSongIndex < filteredSongs.length - 1) {{
+            if (currentSongIndex >= 0 && currentSongIndex < filteredSongs.length - 1){
                 currentSongIndex++;
                 let nextSongDiv = filteredSongs[currentSongIndex];
                 let nextSongPath = nextSongDiv.getElementsByClassName('play-button')[0].getAttribute('onclick').match(/'(.+)'/)[1];
                 playSong(nextSongPath, currentSongIndex);
                 document.getElementById('musicTitle').innerHTML=decodeURIComponent(nextSongPath.split('/').reverse()[0]);
-            }}
-        }}
+            }
+        }
+
+
+                function updateMediaSession(tags, filePath) {
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: tags.title || 'Unknown Title',
+                    artist: tags.artist || 'Unknown Artist',
+                    album: tags.album || 'Unknown Album',
+                    artwork: [
+                        { src: 'https://dummyimage.com/96x96', sizes: '96x96', type: 'image/png' },
+                        { src: 'https://dummyimage.com/128x128', sizes: '128x128', type: 'image/png' },
+                        { src: 'https://dummyimage.com/192x192', sizes: '192x192', type: 'image/png' },
+                        { src: 'https://dummyimage.com/256x256', sizes: '256x256', type: 'image/png' }
+       
+                    ]
+                });
+
+                navigator.mediaSession.setActionHandler('play', function() { document.getElementById('audioPlayer').play(); });
+                navigator.mediaSession.setActionHandler('pause', function() { document.getElementById('audioPlayer').pause(); });
+                navigator.mediaSession.setActionHandler('previoustrack', playPreviousSong);
+                navigator.mediaSession.setActionHandler('nexttrack', playNextSong);
+            }
+        }
 
         // Search function to filter songs by title, album, or artist
-           function searchSongs() {{
+           function searchSongs(){
             var input = document.getElementById('searchBar').value.toLowerCase();
             var songs = document.getElementsByClassName('song');
             filteredSongs = [];  // Clear filtered list
-            for (var i = 0; i < songs.length; i++) {{
+            for (var i = 0; i < songs.length; i++){
                 var songTitle = songs[i].getElementsByClassName('song-title')[0].textContent.toLowerCase();
                 var songAlbum = songs[i].getElementsByClassName('song-album')[0].textContent.toLowerCase();
                 var songArtist = songs[i].getElementsByClassName('song-artist')[0].textContent.toLowerCase();
                 
                 // If search input matches the song title, album, or artist, show the song
-                if (songTitle.includes(input) || songAlbum.includes(input) || songArtist.includes(input)) {{
+                if (songTitle.includes(input) || songAlbum.includes(input) || songArtist.includes(input)){
                     songs[i].style.display = '';
                     filteredSongs.push(songs[i]);  // Add to filtered list
-                }} else {{
+                } else{
                     songs[i].style.display = 'none';
-                }}
-            }}
+                }
+            }
 
             // Reset the current song index since the filtered list has changed
             currentSongIndex = -1;
-        }}
+        }
     </script>
 </head>
 <body class="bg-gray-100 p-5">
