@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trim YouTube Audio</title>
+</head>
+<body>
+  <h1>Trim and Record YouTube Audio</h1>
+  <div id="player"></div>
+  <button onclick="start()">Start</button>
+  <button onclick="startRecording(10, 20)">Start Recording (10s to 20s)</button>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    let player;
+    let audioContext ;
+    let mediaRecorder;
+    let audioChunks = [];
+
+    function start(){
+        audioContext= new (window.AudioContext || window.webkitAudioContext)();
+       
+    }
+
+    // Load the YouTube Player API
+    function onYouTubeIframeAPIReady() {
+        alert(4);
+      player = new YT.Player('player', {
+        height: '360',
+        width: '640',
+        videoId: 'dQw4w9WgXcQ', // Replace 'YOUR_VIDEO_ID' with the actual video ID
+        events: {
+          'onReady': onPlayerReady,
+          'onError': onPlayerError
+        }
+      });
+    }
+    function onPlayerError(event) {
+      console.error('Error loading YouTube player:', event.data);
+    }
+
+    function onPlayerReady(event) {
+      console.log('Player is ready');
+      // Create the MediaElementSource and set up audio recording
+      captureAudioFromVideo(player.getIframe());
+    }
+
+    function captureAudioFromVideo(videoElement) {
+      let source = audioContext.createMediaElementSource(videoElement);
+      let destination = audioContext.createMediaStreamDestination();
+      source.connect(destination);
+      source.connect(audioContext.destination);
+
+      mediaRecorder = new MediaRecorder(destination.stream);
+      mediaRecorder.ondataavailable = (event) => {
+        audioChunks.push(event.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const downloadLink = document.createElement('a');
+        downloadLink.href = audioUrl;
+        downloadLink.download = 'trimmed-audio.mp3';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        audioChunks = []; // Clear the chunks for future recordings
+      };
+    }
+
+    function startRecording(startTime, endTime) {
+      player.seekTo(startTime);
+      player.playVideo();
+      mediaRecorder.start();
+
+      setTimeout(() => {
+        mediaRecorder.stop();
+        player.pauseVideo();
+      }, (endTime - startTime) * 1000); // Stop recording after the specified duration
+    }
+  </script>
+</body>
+</html>

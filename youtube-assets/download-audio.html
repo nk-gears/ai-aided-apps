@@ -1,0 +1,60 @@
+javascript:(function() {
+    const startTime = prompt('Enter the start time in seconds for audio recording:');
+    const endTime = prompt('Enter the end time in seconds for audio recording:');
+    if (startTime === null || endTime === null || isNaN(startTime) || isNaN(endTime) || Number(startTime) >= Number(endTime)) {
+      alert('Invalid input. Please enter valid start and end times.');
+      return;
+    }
+  
+    const video = document.querySelector('video');
+    if (!video) {
+      alert('No video element found on this page.');
+      return;
+    }
+  
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContext.createMediaElementSource(video);
+      const destination = audioContext.createMediaStreamDestination();
+      source.connect(destination);
+      source.connect(audioContext.destination);
+  
+      const mediaRecorder = new MediaRecorder(destination.stream);
+      let audioChunks = [];
+  
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunks.push(event.data);
+        }
+      };
+  
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const downloadLink = document.createElement('a');
+        downloadLink.href = audioUrl;
+        downloadLink.download = 'recorded-audio.webm';
+        downloadLink.textContent = 'Download audio';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        audioChunks = [];
+      };
+  
+      video.currentTime = Number(startTime);
+      video.play();
+      mediaRecorder.start();
+  
+      setTimeout(() => {
+        mediaRecorder.stop();
+        video.pause();
+        alert('Recording complete.');
+      }, (Number(endTime) - Number(startTime)) * 1000);
+  
+      alert(`Recording audio from ${startTime}s to ${endTime}s. Please wait for it to finish.`);
+    } catch (error) {
+      alert('Failed to record audio. This may be due to browser restrictions or CORS policy.');
+      console.error('Error:', error);
+    }
+  })();
+  

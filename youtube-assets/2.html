@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Player</title>
+</head>
+<body>
+  <h1>YouTube Player Demo</h1>
+  <div id="player"></div>
+
+  <!-- Load the YouTube Iframe API -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    let player;
+
+    // This function must be in the global scope for the YouTube API to call it
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '360',
+        width: '640',
+        videoId: 'dQw4w9WgXcQ', // Replace with a valid YouTube video ID
+        events: {
+          'onReady': onPlayerReady,
+          'onError': onPlayerError
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      console.log('YouTube Player is ready');
+      // Optionally, start the video automatically
+      // event.target.playVideo();
+    }
+
+    function onPlayerError(event) {
+      console.error('Error loading YouTube player:', event.data);
+    }
+  </script>
+</body>
+</html>
