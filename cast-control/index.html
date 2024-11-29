@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chromecast Volume Control</title>
+    <script type="text/javascript" src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+    <script type="text/javascript">
+      window.__onGCastApiAvailable = function(isAvailable) {
+        if (isAvailable) {
+          initializeCastApi();
+        }
+      };
+
+      function initializeCastApi() {
+        cast.framework.CastContext.getInstance().setOptions({
+          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+        });
+      }
+
+      async function setVolumeLevel(volumeLevel) {
+        const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+        if (castSession) {
+          const media = castSession.getMediaSession();
+          if (media) {
+            media.setVolume(volumeLevel);
+          } else {
+            castSession.setVolume(volumeLevel);
+          }
+        } else {
+          console.error('No active cast session found.');
+        }
+      }
+
+      // Example: Set volume to 50%
+      function changeVolume() {
+        setVolumeLevel(0.5); // Volume level should be between 0.0 and 1.0
+      }
+    </script>
+  </head>
+  <body>
+    <button onclick="changeVolume()">Set Volume to 50%</button>
+  </body>
+</html>

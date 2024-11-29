@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Transcription</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #transcript {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            min-height: 100px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        #status {
+            color: #666;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .recording {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real-time Audio Transcription</h1>
+    <button id="startButton">Start Recording</button>
+    <button id="stopButton" disabled>Stop Recording</button>
+    <p id="status">Not recording</p>
+    <div id="transcript"></div>
+
+    <script>
+        let socket;
+        let audioContext;
+        let workletNode;
+        let mediaStream;
+        
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const status = document.getElementById('status');
+        const transcript = document.getElementById('transcript');
+
+        async function initAudioWorklet() {
+            audioContext = new AudioContext();
+            await audioContext.audioWorklet.addModule('audioProcessor.js');
+            
+            mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                    channelCount: 1,
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    sampleRate: 16000
+                } 
+            });
+
+            const source = audioContext.createMediaStreamSource(mediaStream);
+            workletNode = new AudioWorkletNode(audioContext, 'audio-processor');
+            
+            source.connect(workletNode);
+            workletNode.connect(audioContext.destination);
+
+            return workletNode;
+        }
+
+        function stopRecording() {
+            if (socket) {
+                socket.close();
+            }
+            if (audioContext) {
+                audioContext.close();
+            }
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            status.textContent = 'Not recording';
+            status.classList.remove('recording');
+        }
+
+        startButton.onclick = async () => {
+            try {
+                socket = new WebSocket('ws://' + window.location.host);
+                
+                const workletNode = await initAudioWorklet();
+                
+                workletNode.port.onmessage = (event) => {
+                    if (socket.readyState === WebSocket.OPEN) {
+                        const audioData = event.data;
+                        const base64Data = btoa(String.fromCharCode(...new Float32Array(audioData)));
+                        socket.send(base64Data);
+                    }
+                };
+
+                socket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    const p = document.createElement('p');
+                    p.textContent = data.text;
+                    transcript.appendChild(p);
+                    transcript.scrollTop = transcript.scrollHeight;
+                };
+
+                socket.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    stopRecording();
+                };
+
+                startButton.disabled = true;
+                stopButton.disabled = false;
+                status.textContent = 'Recording';
+                status.classList.add('recording');
+            } catch (error) {
+                console.error('Error:', error);
+                status.textContent = 'Error: ' + error.message;
+                stopRecording();
+            }
+        };
+
+        stopButton.onclick = stopRecording;
+
+        // Clean up on page unload
+        window.onbeforeunload = () => {
+            stopRecording();
+        };
+    </script>
+</body>
+</html>

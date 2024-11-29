@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participation Certificate </title>
+    <style>
+
+        .footer{
+            position: absolute;
+            bottom: -4px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 0.875em; /* 14px */
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .banner {
+            width: 100%;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .banner img {
+            max-height: 200px;
+            width: auto;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .certificate-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        #certificateImage {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .name-overlay, .age-overlay {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: black;
+            font-weight: bold;
+        }
+
+        .name-overlay {
+            top: 45%;
+            font-size: 3vw;
+        }
+
+        .age-overlay {
+            top: 55%;
+            font-size: 2vw;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 600px) {
+            .banner img {
+                max-height: 200px;
+            }
+            .name-overlay {
+                font-size: 5vw;
+            }
+            .age-overlay {
+                font-size: 4vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <img src="./yfc-logo.png" alt="Logo">
+    </div>
+    <div class="container">
+        <h2 style="text-align:center;">Youth for Change - Participation Certificate</h2>
+        <input type="text" id="regInput" placeholder="Enter Registration Number">
+        <input type="text" id="nameInput" placeholder="Enter Name">
+        <button id="generateBtn">Get my Certificate</button>
+
+        <div class="certificate-container" id="certificateContainer">
+            <img id="certificateImage" src="./cert.png" alt="Certificate Template">
+            <div id="nameOverlay" class="name-overlay"></div>
+            <div id="ageOverlay" class="age-overlay"></div>
+        </div>
+    </div>
+    <footer class="footer">
+        © 2024 Brahma Kumaris. Youth for Change. All Rights Reserved.
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const nameInput = document.getElementById('nameInput');
+            const regInput = document.getElementById('regInput');
+            const generateBtn = document.getElementById('generateBtn');
+            const certificateContainer = document.getElementById('certificateContainer');
+            const nameOverlay = document.getElementById('nameOverlay');
+            const ageOverlay = document.getElementById('ageOverlay');
+
+            // Validation and button state
+            function updateButtonState() {
+                generateBtn.disabled = !nameInput.value || !regInput.value;
+            }
+
+            nameInput.addEventListener('input', updateButtonState);
+            regInput.addEventListener('input', updateButtonState);
+
+            // Generate Certificate
+            generateBtn.addEventListener('click', () => {
+                // Update overlays
+                nameOverlay.textContent = nameInput.value;
+                ageOverlay.textContent = `Age: ${regInput.value}`;
+                
+                // Show certificate container
+                certificateContainer.style.display = 'block';
+
+                // Use html2canvas to convert to downloadable image
+                import('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js')
+                    .then(module => {
+                        const html2canvas = module.default;
+                        html2canvas(certificateContainer, {
+                            scale: 2,
+                            useCORS: true
+                        }).then(canvas => {
+                            // Create download link
+                            const link = document.createElement('a');
+                            link.download = `${nameInput.value}_participation_certificate.png`;
+                            link.href = canvas.toDataURL('image/png');
+                            link.click();
+
+                            // Hide container after download
+                            certificateContainer.style.display = 'none';
+                        });
+                    });
+            });
+
+            // Initial button state
+            updateButtonState();
+        });
+    </script>
+</body>
+</html>

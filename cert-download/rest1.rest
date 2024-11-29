@@ -1,0 +1,13 @@
+#POST http://localhost:8000/generate_certificate.php
+
+#POST https://happy-village.org/youth-festival/cert-download/generate_certificate.php
+POST https://happy-village.org/youth-festival/cert-download/generate_certificate.php
+Content-Type: application/json
+
+{
+    "name": "Nirmal Kumar ",
+    "namePosition": { "x": 1010, "y": 580 },
+    "course": "Youth for Change",
+    "coursePosition": { "x": 900, "y": 686 },
+    "date": "2024-11-29"
+}

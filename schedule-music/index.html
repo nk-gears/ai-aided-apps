@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Scheduler</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <h1>Music Scheduler</h1>
+    <form id="scheduleForm">
+      <label for="time">Set Playback Time:</label>
+      <input type="time" id="time" required>
+      <label for="track">Choose a Track:</label>
+      <select id="track">
+        <option value="track1.mp3">Track 1</option>
+        <!-- Add more options as needed -->
+      </select>
+      <button type="submit">Schedule</button>
+    </form>
+    <div id="message"></div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
