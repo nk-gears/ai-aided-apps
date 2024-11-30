@@ -1,7 +1,7 @@
 #POST http://localhost:8000/generate_certificate.php
 
 #POST https://happy-village.org/youth-festival/cert-download/generate_certificate.php
-POST https://happy-village.org/youth-festival/cert-download/generate_certificate.php
+POST  http://localhost:9000/generate_certificate.php
 Content-Type: application/json
 
 {

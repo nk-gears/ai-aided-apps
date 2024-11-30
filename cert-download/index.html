@@ -1,188 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Participation Certificate </title>
-    <style>
-
-        .footer{
-            position: absolute;
-            bottom: -4px;
-            margin-bottom: 10px;
-            text-align: center;
-            font-size: 0.875em; /* 14px */
-        }
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .banner {
-            width: 100%;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .banner img {
-            max-height: 200px;
-            width: auto;
-        }
-
-        .container {
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .certificate-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            margin-top: 20px;
-            display: none;
-        }
-
-        #certificateImage {
-            max-width: 100%;
-            height: auto;
-        }
-
-        .name-overlay, .age-overlay {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            color: black;
-            font-weight: bold;
-        }
-
-        .name-overlay {
-            top: 45%;
-            font-size: 3vw;
-        }
-
-        .age-overlay {
-            top: 55%;
-            font-size: 2vw;
-        }
-
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            box-sizing: border-box;
-        }
-
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-
-        @media (max-width: 600px) {
-            .banner img {
-                max-height: 200px;
-            }
-            .name-overlay {
-                font-size: 5vw;
-            }
-            .age-overlay {
-                font-size: 4vw;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="banner">
-        <img src="./yfc-logo.png" alt="Logo">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Participation Certificate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <meta property="og:title" content="Participation Certificate | Youth for Change - Youth Festival" />
+    <meta property="og:description" content="Get your Participtaion Certificate for the 'Youth for Change Event'" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://happy-village.org/youth-festival/cert-download/" />
+    <meta property="og:image" content="https://happy-village.org/youth-festival/cert-download/yfc-logo.png" />
+  </head>
+  <body
+    class="font-sans flex flex-col items-center min-h-screen bg-gray-100 p-5"
+  >
+    <div class="w-full flex justify-center items-center mb-5">
+      <img src="./yfc-logo.png" alt="Logo" class="max-h-48" />
     </div>
-    <div class="container">
-        <h2 style="text-align:center;">Youth for Change - Participation Certificate</h2>
-        <input type="text" id="regInput" placeholder="Enter Registration Number">
-        <input type="text" id="nameInput" placeholder="Enter Name">
-        <button id="generateBtn">Get my Certificate</button>
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+      <h2 class="text-center text-xl font-bold mb-5">
+        Youth for Change - Participation Certificate
+      </h2>
+      <div
+        class="flex items-center border border-gray-300 rounded mb-3 focus-within:ring-2 focus-within:ring-blue-400"
+      >
+        <span
+          class="bg-gray-200 px-3 py-2 text-gray-700 font-semibold rounded-l"
+          >YCF -
+        </span>
+        <input
+          type="number"
+          id="regInput"
+          maxlength="5"
+          onblur="verifyReg()"
+          placeholder="Enter Registration Number"
+          class="flex-grow p-2 focus:outline-none"
+        />
+      </div>
+      <input
+        type="text"
+        id="nameInput"
+        placeholder="Enter Name"
+        class="w-full p-2 mb-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+      <button
+        id="generateBtn"
+        disabled
+        class="w-full p-2 mb-3 bg-green-500 text-white font-semibold rounded cursor-pointer hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+      >
+        Get my Certificate
+      </button>
 
-        <div class="certificate-container" id="certificateContainer">
-            <img id="certificateImage" src="./cert.png" alt="Certificate Template">
-            <div id="nameOverlay" class="name-overlay"></div>
-            <div id="ageOverlay" class="age-overlay"></div>
-        </div>
+      <div
+        class="relative w-full max-w-3xl mt-5 hidden"
+        id="certificateContainer"
+      >
+ 
+        <img id="certificateImage" alt="Certificate" class="w-full max-w-md mx-auto my-5 border rounded" />
+
+        <div class="bg-[#fff] shadow-slate-50 pb-6">
+            <div class="flex flex-row items-center py-4 justify-evenly">
+                <div onclick="shareImage()"
+                class="flex flex-col items-center justify-center border px-1 py-3 border-[#61D66A] rounded bg-[#F2FFF4] h-[94px] w-[83px]"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                  class="h-8 w-8 text-black"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"
+                  ></path>
+                </svg>
+                <p class="text-[12px] font-semibold text-center">Share Via</p>
+              </div>
+              <div onclick="downloadImage()"
+                class="flex flex-col items-center justify-center border px-1 py-3 border-[#61D66A] rounded bg-[#F2FFF4] h-[94px] w-[83px]"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  aria-hidden="true"
+                  class="h-8 w-8 text-black"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                  ></path>
+                </svg>
+                <p class="text-[12px] font-semibold text-center">Download</p>
+              </div>
+           
+              
+            </div>
+          </div>
+      </div>
+
+
+      <div>
+        <footer class="bottom-0 mb-2 text-center text-sm">
+          © 2024
+          <a
+            target="_blank"
+            href="https://brahmakumaris.com"
+            class="text-blue-600 hover:underline"
+            >Brahma Kumaris</a
+          >
+          | Youth Festival - Youth for Change. All Rights Reserved.
+          <span>
+            |
+            <a
+              target="_blank"
+              href="https://forms.gle/PiihUvvJ9JvQ3JYT8"
+              class="text-blue-700 hover:underline"
+              >Feedback</a
+            ></span
+          >
+        </footer>
+      </div>
     </div>
-    <footer class="footer">
-        © 2024 Brahma Kumaris. Youth for Change. All Rights Reserved.
-    </footer>
-
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const nameInput = document.getElementById('nameInput');
-            const regInput = document.getElementById('regInput');
-            const generateBtn = document.getElementById('generateBtn');
-            const certificateContainer = document.getElementById('certificateContainer');
-            const nameOverlay = document.getElementById('nameOverlay');
-            const ageOverlay = document.getElementById('ageOverlay');
+          let isValidReg=false;
+          const nameInput = document.getElementById('nameInput');
+          const regInput = document.getElementById('regInput');
+          const generateBtn = document.getElementById('generateBtn');
+          document.addEventListener('DOMContentLoaded', () => {
 
-            // Validation and button state
-            function updateButtonState() {
-                generateBtn.disabled = !nameInput.value || !regInput.value;
-            }
+              
 
-            nameInput.addEventListener('input', updateButtonState);
-            regInput.addEventListener('input', updateButtonState);
+              const certificateContainer = document.getElementById('certificateContainer');
+              const nameOverlay = document.getElementById('nameOverlay');
+              const ageOverlay = document.getElementById('ageOverlay');
 
-            // Generate Certificate
-            generateBtn.addEventListener('click', () => {
-                // Update overlays
-                nameOverlay.textContent = nameInput.value;
-                ageOverlay.textContent = `Age: ${regInput.value}`;
-                
-                // Show certificate container
-                certificateContainer.style.display = 'block';
+              generateBtn.addEventListener('click',async ()=>{
+                await fetchCertificate();
+                document.getElementById('certificateContainer').classList.remove('hidden');
 
-                // Use html2canvas to convert to downloadable image
-                import('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js')
-                    .then(module => {
-                        const html2canvas = module.default;
-                        html2canvas(certificateContainer, {
-                            scale: 2,
-                            useCORS: true
-                        }).then(canvas => {
-                            // Create download link
-                            const link = document.createElement('a');
-                            link.download = `${nameInput.value}_participation_certificate.png`;
-                            link.href = canvas.toDataURL('image/png');
-                            link.click();
+              });
 
-                            // Hide container after download
-                            certificateContainer.style.display = 'none';
-                        });
-                    });
+              // Validation and button state
+              function updateButtonState() {
+                  generateBtn.disabled = !nameInput.value || !regInput.value;
+                  if(!isValidReg) generateBtn.disabled=false;
+              }
+
+              nameInput.addEventListener('input', updateButtonState);
+              regInput.addEventListener('input', updateButtonState);
+
             });
 
-            // Initial button state
-            updateButtonState();
-        });
+          function fetchDataFromAPI(url, callback) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url);
+        xhr.onload = function () {
+          if (xhr.status === 200) {
+            const data = JSON.parse(xhr.responseText);
+            callback(data);
+          } else {
+            console.error('Error fetching data:', xhr.statusText);
+          }
+        };
+        xhr.send();
+      }
+
+
+      async function verifyReg(){
+              const regId=document.getElementById('regInput').value;
+
+         getUserInfo(regId,async function(result){
+            if(result.name && result.name.indexOf('found')<=-1)
+            {
+              //alert("User name" + result.name);
+              document.getElementById('nameInput').value=result.name;
+              generateBtn.disabled =false;
+              isValidReg=true;
+              
+              //certFile
+            }else{
+              generateBtn.disabled =true;
+              document.getElementById('nameInput').value='';
+              isValidReg=false;
+              alert("Reg No not found");
+            }
+
+
+          })
+          }
+
+      function getUserInfo(regNo,callback) {
+      const apiUrl = './verify.php?regNo=YCF-' + regNo;  // Replace with your API URL
+      fetchDataFromAPI(apiUrl, function (data) {
+      callback(data)
+      });
+      }
+
+      async function fetchCertificate() {
+        const url = './generate_certificate.php';
+        const requestBody = {
+            name: nameInput.value,
+            regNo: regInput.value,
+            namePosition: { x: 1010, y: 580 },
+            course: "Youth for Change",
+            coursePosition: { x: 900, y: 686 },
+            date: "2024-11-29"
+        };
+
+        try {
+            // Send a POST request to the API
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            // Check if the response is OK
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+           
+            // Convert the response into a Blob
+            const imageBlob = await response.blob();
+  
+            const imageUrl = URL.createObjectURL(imageBlob);
+            // Update the image element dynamically
+            const certificateImage = document.getElementById('certificateImage');
+            certificateImage.src = imageUrl;
+
+            console.log('Certificate image updated successfully');
+        } catch (error) {
+            console.error('Error fetching certificate:', error.message);
+        }
+    }
+
+    async function shareImage() {
+        try {
+            const imgElement = document.getElementById('certificateImage');
+            const imageUrl = imgElement.src;
+
+            // Convert the image URL to a Blob
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const file = new File([blob], 'image.png', { type: blob.type });
+
+            // Use the Web Share API if available
+            if (navigator.share && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    title: 'Certificate',
+                    text: 'Here is your certificate!',
+                    files: [file],
+                });
+                alert('Image shared successfully!');
+            } else {
+                alert('Web Share API is not supported on this browser.');
+            }
+        } catch (error) {
+            console.error('Error sharing image:', error);
+            alert('Unable to share the image.');
+        }
+    }
+
+    function downloadImage() {
+        const imgElement = document.getElementById('certificateImage');
+        const imageUrl = imgElement.src;
+
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = 'certificate.png';
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+        
     </script>
-</body>
+  </body>
 </html>
